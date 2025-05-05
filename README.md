@@ -1,112 +1,120 @@
-# MongoDB User Data Management MCP Server
+# Role-Based User Management API
 
-A FastMCP server implementation for managing user data with MongoDB, providing tools for data insertion and retrieval operations.
+A FastAPI-based REST API that implements role-based authentication and user management with MongoDB as the database backend. The system supports user registration, authentication, and role-based access control (RBAC) with admin and regular user roles.
 
 ## Features
 
-- MongoDB integration with automatic connection verification
-- User data management with fields: name, email, and product
-- Data validation and error handling
-- Test data initialization
-- RESTful API endpoints for data operations
+- User registration and authentication
+- JWT-based token authentication
+- Role-based access control (Admin and User roles)
+- Secure password hashing using bcrypt
+- MongoDB integration for data persistence
+- RESTful API endpoints
 
 ## Prerequisites
 
-- Python >= 3.12
-- MongoDB server running on localhost:27017
-- Required Python packages (specified in pyproject.toml):
-  - mcp[cli] >= 1.7.0
-  - pymongo == 4.6.0
+- Python 3.8 or higher
+- MongoDB installed and running
+- pip (Python package manager)
 
 ## Installation
 
-1. Ensure MongoDB is installed and running on your system
-2. Clone the repository
-3. Install dependencies using your preferred Python package manager
-
+1. Clone the repository:
 ```bash
-# Using pip
+git clone <repository-url>
+cd role-base-user-2
+```
+
+2. Install dependencies:
+```bash
 pip install -r requirements.txt
 ```
 
-## Available Tools
+3. Set up MongoDB:
+- Ensure MongoDB is installed and running on your system
+- The application will automatically connect to the default MongoDB instance
 
-### 1. Document Insertion
-```python
-insert_document(collection: str, document: dict) -> dict
-```
-- Inserts a new document into specified collection
-- Required fields: name, email, product
-- Returns success status and document ID
+## Running the Application
 
-### 2. Document Search
-```python
-find_documents(collection: str, query: dict = {}) -> dict
-```
-- Searches for documents matching the query
-- Returns filtered fields: name, email, product
-- Includes document count
+Start the FastAPI server using uvicorn:
 
-### 3. Specific User Search
-```python
-find_dharshini_data(collection: str) -> dict
-```
-- Retrieves documents for user "Dharshini"
-- Returns filtered fields: name, email, product
-- Includes document count
-
-### 4. Collection Schema
-```python
-get_collection_schema(collection: str) -> dict
-```
-- Resource endpoint: `mongodb-collection://{collection}`
-- Returns sample document structure
-
-## Usage Examples
-
-### Starting the Server
-```python
-python server.py
+```bash
+uvicorn app.main:app --reload
 ```
 
-### Inserting a Document
-```python
-document = {
-    "name": "John Doe",
-    "email": "john@example.com",
-    "product": "Basic Subscription"
-}
-result = insert_document("users", document)
-```
+The API will be available at `http://localhost:8000`
 
-### Searching Documents
-```python
-# Find all documents
-result = find_documents("users")
+## API Endpoints
 
-# Find specific user
-result = find_documents("users", {"name": "John Doe"})
-```
+### Authentication
+
+#### Register a New User
+- **POST** `/register`
+- Creates a new user account
+- Body:
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "strongpassword",
+    "role": "user"  // "admin" or "user"
+  }
+  ```
+
+#### Login
+- **POST** `/token`
+- Authenticates user and returns JWT token
+- Form data:
+  - username (email)
+  - password
+
+### User Management
+
+#### Get Current User Info
+- **GET** `/users/me`
+- Returns information about the currently authenticated user
+- Requires authentication
+
+#### List All Users (Admin Only)
+- **GET** `/users`
+- Returns a list of all registered users
+- Requires admin role
+
+## Security
+
+- Passwords are hashed using bcrypt
+- JWT tokens are used for authentication
+- Role-based access control for protected endpoints
+- Input validation using Pydantic models
+
+## Dependencies
+
+- FastAPI: Web framework for building APIs
+- PyMongo: MongoDB driver for Python
+- Python-Jose: JWT token handling
+- Passlib: Password hashing
+- Python-multipart: Form data parsing
+- Uvicorn: ASGI server
 
 ## Error Handling
 
-The server implements comprehensive error handling:
-- MongoDB connection verification
-- Required field validation
-- Document existence checks
-- Proper error messages and status codes
+The API uses standard HTTP status codes:
+- 200: Success
+- 400: Bad Request
+- 401: Unauthorized
+- 403: Forbidden
+- 404: Not Found
+- 500: Internal Server Error
 
-## Test Data
+## Development
 
-The server automatically initializes with test data for demonstration:
-- User: Dharshini
-- Email: dharshini@example.com
-- Product: Premium Subscription
+For development purposes, the server can be started with auto-reload:
 
-## Contributing
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+## API Documentation
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+FastAPI automatically generates interactive API documentation:
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
